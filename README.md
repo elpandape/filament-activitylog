@@ -126,8 +126,12 @@ rewriting the past. A missing key is information — it tells "there was no auth
 "this row predates the seal", which falls back to the relation. That shape is public API from
 1.0.0.
 
-The role needs your authorization system, which the package does not know, so you name a
-class:
+The role is read by default from the causer's own `roles` relation, which is what Bouncer
+and `spatie/laravel-permission` both leave on a model, and answers nothing for a model that
+has none. It costs one query per entry written; `'causer_role' => null` turns it off.
+
+Roles kept somewhere else — a column, a single `role` relation, a service — need a class of
+your own:
 
 ```php
 use ElPandaPe\FilamentActivitylog\Contracts\ResolvesCauserRole;
@@ -137,9 +141,7 @@ final class RoleOfCauser implements ResolvesCauserRole
 {
     public function __invoke(Model $causer): ?string
     {
-        $role = $causer->roles()->orderBy('roles.id')->value('title');
-
-        return is_string($role) ? $role : null;
+        return $causer->getAttributes()['role'] ?? null;
     }
 }
 ```
@@ -164,7 +166,7 @@ covers the change set only — anything you pass to `withProperties()` is writte
 | `masked` | Attributes whose values are never written and never shown, whatever model they belong to. |
 | `logging.seal_actors` | Whether the names of the parties are written into the row. |
 | `logging.mask_secrets` | Whether masked values are replaced before the row is written. |
-| `logging.causer_role` | The class that answers which role the author acted with. |
+| `logging.causer_role` | Who answers which role the author acted with. Defaults to reading the causer's own `roles` relation; null asks nobody. |
 | `records` | Per record type: the icon and colour it shows with, and the attribute it is named by. Keyed by whatever your log stores in `subject_type` — the class name, or the alias if you use a morph map. |
 | `descriptions` | How a stored description is said on screen. Translating on read keeps the row honest. |
 | `timeline.limit` · `timeline.style` | How many entries the drawer shows, and whether it reads as rows or as a thread. |

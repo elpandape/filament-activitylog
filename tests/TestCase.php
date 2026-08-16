@@ -161,6 +161,19 @@ abstract class TestCase extends ApplicationTestCase
             $table->timestamps();
         });
 
+        // The shape a roles package leaves behind, which is what the default role resolver
+        // reads: a table of roles and a pivot, and nothing of any particular vendor.
+        Schema::create('roles', static function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('title')->nullable();
+        });
+
+        Schema::create('role_user', static function (Blueprint $table): void {
+            $table->foreignId('role_id');
+            $table->foreignId('user_id');
+        });
+
         // Named by `title` rather than `name`, and shown by no resource: this is what the
         // suite points at to reach the configured naming attribute and the cases where a
         // party has nowhere to link to.

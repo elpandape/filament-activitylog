@@ -9,6 +9,22 @@ breaking the public API takes a major bump — and the shape of what is written 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-16
+
+### Added
+
+- **A role resolver that works out of the box.** The role an author acted with is now read
+  from the causer's own `roles` relation — the shape Bouncer and `spatie/laravel-permission`
+  both leave on a model — so an application gets it sealed without writing a class. One that
+  keeps roles somewhere else still names a `ResolvesCauserRole` of its own, and
+  `'causer_role' => null` asks nobody.
+
+### Changed
+
+- `logging.causer_role` defaults to that resolver rather than to nothing, so an entry written
+  by somebody holding a role now seals it where it used to seal only their name. It costs one
+  query per entry written.
+
 ## [1.0.0] - 2026-08-16
 
 First release. The package was built and validated inside one application before being cut
@@ -65,5 +81,6 @@ loose; this is the point where it stops depending on that application to be true
   translated; the grammar is not, because word order does not survive string replacement.
 - Dates follow Carbon's locale, which `App::setLocale()` does not reach.
 
-[Unreleased]: https://github.com/elpandape/filament-activitylog/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/elpandape/filament-activitylog/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.1.0
 [1.0.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.0.0

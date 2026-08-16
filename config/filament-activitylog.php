@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use ElPandaPe\FilamentActivitylog\Logging\CauserRoleFromRelation;
 use Filament\Support\Icons\Heroicon;
 
 return [
@@ -67,11 +68,15 @@ return [
          * Which role the author acted with, sealed alongside the names and for the same
          * reason: taking a role away later must not rewrite what its holder did.
          *
-         * The package knows no authorization system, so this is the class name of an
-         * invokable implementing `Contracts\ResolvesCauserRole`. A class name and not a
-         * closure because this file is cached, and `config:cache` chokes on a closure.
+         * The default reads the causer's own `roles` relation, which is what Bouncer and
+         * `spatie/laravel-permission` both give it, and answers nothing for a model that has
+         * none. Roles kept somewhere else need a class of your own implementing
+         * `Contracts\ResolvesCauserRole`; null asks nobody and seals no role at all.
+         *
+         * A class name and not a closure because this file is cached, and `config:cache`
+         * chokes on a closure.
          */
-        'causer_role' => null,
+        'causer_role' => CauserRoleFromRelation::class,
     ],
 
     /*

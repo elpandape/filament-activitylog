@@ -15,4 +15,12 @@ final class Article extends Model
     protected $table = 'articles';
 
     protected $guarded = [];
+
+    /**
+     * Not a relation, on purpose: what the default role resolver has to refuse to read.
+     */
+    public function roles(): string
+    {
+        return 'this is not a relation';
+    }
 }
