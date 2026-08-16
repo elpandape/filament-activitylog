@@ -1,0 +1,27 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
+    - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+
+    paths:
+        - src
+        - tests
+
+    level: max
+
+    reportUnmatchedIgnoredErrors: true
+
+    ignoreErrors:
+        # Larastan resolves `view-string` through an application's view finder, and this package
+        # registers its own namespace at runtime from the service provider: analysed on its own
+        # there is no application, so every `filament-activitylog::` name reads as a plain string.
+        # That the views exist is proven instead by a test enumerating what ships under
+        # `resources/views` and asserting each one resolves.
+        -
+            identifier: argument.type
+            message: '#expects view-string\|null, string given#'
+            paths:
+                - src/Filament

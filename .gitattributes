@@ -1,0 +1,11 @@
+# `export-ignore` only affects `git archive`, which is how Packagist builds the dist tarball.
+# Every file listed here is still present in a clone.
+/tests export-ignore
+/.github export-ignore
+/composer.lock export-ignore
+/phpunit.xml.dist export-ignore
+/phpstan.neon export-ignore
+/rector.php export-ignore
+/pint.json export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
