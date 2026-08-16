@@ -68,10 +68,10 @@ return [
          * Which role the author acted with, sealed alongside the names and for the same
          * reason: taking a role away later must not rewrite what its holder did.
          *
-         * The default reads the causer's own `roles` relation, which is what Bouncer and
-         * `spatie/laravel-permission` both give it, and answers nothing for a model that has
-         * none. Roles kept somewhere else need a class of your own implementing
-         * `Contracts\ResolvesCauserRole`; null asks nobody and seals no role at all.
+         * The default reads a `roles` relation on the causer's own model and names what it
+         * finds through `records`, like every other record here; a model with no such
+         * relation answers nothing. Roles that are not a relation need a class of your own
+         * implementing `Contracts\ResolvesCauserRole`; null asks nobody at all.
          *
          * A class name and not a closure because this file is cached, and `config:cache`
          * chokes on a closure.
@@ -86,8 +86,9 @@ return [
      * panel's registered aliases, and `name` is the attribute a record is named by, for
      * models that call it something other than `name`.
      *
-     * A model that is not listed falls back to a neutral icon. Plain values only: this
-     * file is cached, and `config:cache` chokes on a closure.
+     * A model that is not listed falls back to a neutral icon and to `name`. This is also
+     * where a role model is told what it is called, which is what the default role resolver
+     * reads. Plain values only: this file is cached, and `config:cache` chokes on a closure.
      */
     'records' => [
         // \App\Models\User::class => ['icon' => Heroicon::OutlinedUser, 'color' => 'info', 'name' => 'full_name'],

@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace ElPandaPe\FilamentActivitylog\Logging;
 
 use ElPandaPe\FilamentActivitylog\Contracts\ResolvesCauserRole;
+use ElPandaPe\FilamentActivitylog\Support\RecordName;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * The role an author acted with, read from whatever `roles` relation their model has.
+ * The role an author acted with, read from a `roles` relation on their own model.
  *
- * Still no authorization system: this asks the causer's own model, so it works with Bouncer,
- * with `spatie/laravel-permission`, and with a relation somebody wrote by hand — and answers
- * null for a model that has none. An application whose roles live somewhere else implements
- * `ResolvesCauserRole` instead and names its class in the configuration.
+ * It knows nothing about where those roles come from: it asks the causer's model for the
+ * relation, and asks the role it finds for its name the same way every other record in this
+ * package is named — through `records`, so a role called by something other than `name` is
+ * declared once and read everywhere.
+ *
+ * A model with no such relation answers null, and an application whose roles are not a
+ * relation at all implements `ResolvesCauserRole` instead.
  *
  * It costs one query per entry written, which is the price of sealing the role rather than
  * looking it up later; `logging.causer_role` set to null is how that is turned off.
@@ -34,25 +38,11 @@ final class CauserRoleFromRelation implements ResolvesCauserRole
             return null;
         }
 
-        // Qualified, and after dropping whatever order the relation carries: Bouncer's roles
-        // arrive through a pivot, where a bare `id` is ambiguous to PostgreSQL.
+        // Qualified, and after dropping whatever order the relation carries: roles reached
+        // through a pivot make a bare `id` ambiguous to PostgreSQL.
         $role = $roles->reorder()->orderBy($roles->getRelated()->getQualifiedKeyName())->first();
 
-        if (! $role instanceof Model) {
-            return null;
-        }
-
-        // `getAttributes()` and not `getAttribute()`: under `preventAccessingMissingAttributes`
-        // asking for a column the model does not have throws, and `title` is Bouncer's, not
-        // everybody's.
-        $title = $role->getAttributes()['title'] ?? null;
-        $name = $role->getAttributes()['name'] ?? null;
-
-        return match (true) {
-            is_string($title) && $title !== '' => $title,
-            is_string($name) && $name !== '' => $name,
-            default => null,
-        };
+        return $role instanceof Model ? RecordName::of($role) : null;
     }
 
     /**

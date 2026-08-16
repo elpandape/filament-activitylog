@@ -14,23 +14,25 @@ function roleNamed(string $name, ?string $title = null): Role
     return Role::forceCreate(['name' => $name, 'title' => $title]);
 }
 
-test('a role is read by the title it goes by', function (): void {
+test('a role is read by its name, knowing nothing of where roles come from', function (): void {
+    $causer = makeUser();
+    $causer->roles()->attach(roleNamed('auditor', 'Auditor'));
+
+    expect((new CauserRoleFromRelation)($causer))->toBe('auditor');
+});
+
+test('a role called by something other than name says so in the records configuration', function (): void {
+    config()->set('filament-activitylog.records.'.Role::class.'.name', 'title');
+
     $causer = makeUser();
     $causer->roles()->attach(roleNamed('super-admin', 'Super admin'));
 
     expect((new CauserRoleFromRelation)($causer))->toBe('Super admin');
 });
 
-test('a role with no title of its own is read by its name', function (): void {
+test('a role with nothing to be called answers nothing', function (): void {
     $causer = makeUser();
-    $causer->roles()->attach(roleNamed('auditor'));
-
-    expect((new CauserRoleFromRelation)($causer))->toBe('auditor');
-});
-
-test('a role with neither a title nor a name answers nothing', function (): void {
-    $causer = makeUser();
-    $causer->roles()->attach(roleNamed('', ''));
+    $causer->roles()->attach(roleNamed(''));
 
     expect((new CauserRoleFromRelation)($causer))->toBeNull();
 });
@@ -55,29 +57,29 @@ test('a model that has no roles at all is never asked for one', function (): voi
 test('of several roles the oldest is the one read, and it does not change between entries', function (): void {
     $causer = makeUser();
 
-    $primero = roleNamed('auditor', 'Auditor');
-    $segundo = roleNamed('super-admin', 'Super admin');
+    $primero = roleNamed('auditor');
+    $segundo = roleNamed('super-admin');
 
     $causer->roles()->attach([$segundo->getKey(), $primero->getKey()]);
 
-    expect((new CauserRoleFromRelation)($causer))->toBe('Auditor')
-        ->and((new CauserRoleFromRelation)($causer))->toBe('Auditor');
+    expect((new CauserRoleFromRelation)($causer))->toBe('auditor')
+        ->and((new CauserRoleFromRelation)($causer))->toBe('auditor');
 });
 
 test('an entry seals the role its author held, with nobody having configured anything', function (): void {
     $causer = signIn('Nayra Condori');
-    $causer->roles()->attach(roleNamed('super-admin', 'Super admin'));
+    $causer->roles()->attach(roleNamed('super-admin'));
 
     makeUser('Amaru Quispe')->update(['name' => 'Amaru Yupanqui']);
 
-    expect(lastActivity()->getProperty('actors.causer_role'))->toBe('Super admin');
+    expect(lastActivity()->getProperty('actors.causer_role'))->toBe('super-admin');
 });
 
 test('an application that wants no role sealed says so with null', function (): void {
     config()->set('filament-activitylog.logging.causer_role');
 
     $causer = signIn('Nayra Condori');
-    $causer->roles()->attach(roleNamed('super-admin', 'Super admin'));
+    $causer->roles()->attach(roleNamed('super-admin'));
 
     makeUser('Amaru Quispe')->update(['name' => 'Amaru Yupanqui']);
 

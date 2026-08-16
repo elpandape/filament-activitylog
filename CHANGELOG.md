@@ -9,15 +9,24 @@ breaking the public API takes a major bump — and the shape of what is written 
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-16
+
+### Fixed
+
+- **The default role resolver no longer assumes whose roles they are.** It preferred a
+  `title` attribute over `name`, which is one particular package's column and nobody else's.
+  It now names a role the way this package names every other record — through `records` — so
+  a role called by something other than `name` says so once, in configuration, instead of
+  being guessed at.
+
 ## [1.1.0] - 2026-08-16
 
 ### Added
 
 - **A role resolver that works out of the box.** The role an author acted with is now read
-  from the causer's own `roles` relation — the shape Bouncer and `spatie/laravel-permission`
-  both leave on a model — so an application gets it sealed without writing a class. One that
-  keeps roles somewhere else still names a `ResolvesCauserRole` of its own, and
-  `'causer_role' => null` asks nobody.
+  from a `roles` relation on the causer's own model, so an application gets it sealed without
+  writing a class. One whose roles are not a relation still names a `ResolvesCauserRole` of
+  its own, and `'causer_role' => null` asks nobody.
 
 ### Changed
 
@@ -81,6 +90,7 @@ loose; this is the point where it stops depending on that application to be true
   translated; the grammar is not, because word order does not survive string replacement.
 - Dates follow Carbon's locale, which `App::setLocale()` does not reach.
 
-[Unreleased]: https://github.com/elpandape/filament-activitylog/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/elpandape/filament-activitylog/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.1.1
 [1.1.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.1.0
 [1.0.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.0.0
