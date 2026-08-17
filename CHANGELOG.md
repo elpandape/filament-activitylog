@@ -9,6 +9,18 @@ breaking the public API takes a major bump — and the shape of what is written 
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-17
+
+### Added
+
+- **The context rail fills itself.** The entry page has always read `properties.ip`,
+  `properties.via` and `properties.agent`, and nothing wrote them: every entry said it happened
+  outside a web request until the consuming application stamped those keys by hand, in every place
+  it logged. `logging.stamp_request` does it for every entry instead, whoever wrote it. Keys the
+  caller set are left alone. What decides whether there is a request to describe is the client
+  address and not `runningInConsole()` — a suite runs under the CLI, so asking about the SAPI would
+  behave one way while being tested and another way in the wild.
+
 ## [1.1.1] - 2026-08-16
 
 ### Fixed
@@ -91,6 +103,7 @@ loose; this is the point where it stops depending on that application to be true
 - Dates follow Carbon's locale, which `App::setLocale()` does not reach.
 
 [Unreleased]: https://github.com/elpandape/filament-activitylog/compare/v1.1.1...HEAD
+[1.2.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.2.0
 [1.1.1]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.1.1
 [1.1.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.1.0
 [1.0.0]: https://github.com/elpandape/filament-activitylog/releases/tag/v1.0.0

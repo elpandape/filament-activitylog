@@ -76,6 +76,17 @@ return [
          * A class name and not a closure because this file is cached, and `config:cache`
          * chokes on a closure.
          */
+        /*
+         * Writes down where a request came from, in the three keys the entry page's context rail
+         * reads: the client address, the method and path, and the user agent. Without it that rail
+         * stays empty unless the application passes those keys itself, everywhere it logs.
+         *
+         * Keys the caller already set are left alone, and nothing is written where there is no
+         * client address — a console command, a queued job, a scheduled task — because a bare
+         * `GET /` would say a request happened when none did.
+         */
+        'stamp_request' => true,
+
         'causer_role' => CauserRoleFromRelation::class,
     ],
 

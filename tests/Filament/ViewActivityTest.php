@@ -383,6 +383,7 @@ test('the context tells where the entry came from and where it came in through',
 
 test('an entry that names its agent and no address shows the origin without an address', function () use ($originCard, $addressLabel, $agentLine): void {
     $causer = signIn();
+    askingFromNobody();
 
     activity()
         ->causedBy($causer)
@@ -400,6 +401,7 @@ test('an entry that names its agent and no address shows the origin without an a
 
 test('an entry that names its address and no agent shows the origin without an agent', function () use ($originCard, $addressLabel, $agentLine): void {
     $causer = signIn();
+    askingFromNobody();
 
     activity()
         ->causedBy($causer)
@@ -418,6 +420,7 @@ test('an entry that names its address and no agent shows the origin without an a
 
 test('an entry made outside a request reports the absence instead of leaving blanks', function () use ($originCard, $addressLabel, $agentLine): void {
     $causer = signIn();
+    askingFromNobody();
 
     activity()
         ->causedBy($causer)

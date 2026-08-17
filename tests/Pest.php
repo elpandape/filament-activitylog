@@ -54,3 +54,43 @@ function lastActivity(): Activity
 
     return $activity;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Where a write came from
+|--------------------------------------------------------------------------
+|
+| The request is swapped rather than mutated: `Request::instance()` is one object for the whole
+| process, so setting a header on it leaks into every test that runs after this one.
+|
+*/
+
+function askingFrom(?string $address = '203.0.113.7', ?string $agent = null): void
+{
+    $request = Illuminate\Http\Request::create('/admin/security/activity', 'GET');
+
+    if (is_string($address)) {
+        $request->server->set('REMOTE_ADDR', $address);
+    } else {
+        // Symfony puts a loopback address on every request it builds, and this is how a command,
+        // a job or a scheduled task looks: nobody on the other end.
+        $request->server->remove('REMOTE_ADDR');
+    }
+
+    if (is_string($agent)) {
+        $request->headers->set('User-Agent', $agent);
+    } else {
+        $request->headers->remove('User-Agent');
+    }
+
+    app()->instance('request', $request);
+
+    // The facade caches whatever it resolved first, so rebinding the container alone leaves
+    // `Request::ip()` answering from the request this one replaced.
+    Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
+}
+
+function askingFromNobody(): void
+{
+    askingFrom(null);
+}

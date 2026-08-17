@@ -173,6 +173,7 @@ covers the change set only — anything you pass to `withProperties()` is writte
 | `masked` | Attributes whose values are never written and never shown, whatever model they belong to. |
 | `logging.seal_actors` | Whether the names of the parties are written into the row. |
 | `logging.mask_secrets` | Whether masked values are replaced before the row is written. |
+| `logging.stamp_request` | Whether the entry records the address, method and path, and agent of the request that wrote it. |
 | `logging.causer_role` | Who answers which role the author acted with. Defaults to reading a `roles` relation on the causer and naming it through `records`; null asks nobody. |
 | `records` | Per record type: the icon and colour it shows with, and the attribute it is named by — roles included. Keyed by whatever your log stores in `subject_type` — the class name, or the alias if you use a morph map. |
 | `descriptions` | How a stored description is said on screen. Translating on read keeps the row honest. |
@@ -181,17 +182,20 @@ covers the change set only — anything you pass to `withProperties()` is writte
 ## The context rail
 
 The entry page shows where a request came from, reading `properties.ip`, `properties.via` and
-`properties.agent`. Nothing writes them for you — neither this package nor `activitylog` — so
-until your application stamps them, every entry says it happened outside a web request:
+`properties.agent` — and **`logging.stamp_request` fills them for you**, on every entry, whoever
+wrote it. Reading those keys and never writing them was the one thing this package asked of an
+application in every place it logged.
+
+What decides whether there is a request to describe is the client address, not
+`runningInConsole()`: a test suite runs under the CLI, so asking about the SAPI would take the
+empty branch in every test and never in production. A console command still carries a synthesised
+request whose method and path read as a bare `GET /`, so the address is the one part only a real
+caller brings — without it, nothing is written and the rail says so.
+
+Keys you set yourself are left alone, so `withProperties(['ip' => …])` still wins:
 
 ```php
-activity()
-    ->withProperties([
-        'ip' => request()->ip(),
-        'via' => request()->method().' '.request()->path(),
-        'agent' => request()->userAgent(),
-    ])
-    ->log('…');
+'logging' => ['stamp_request' => false],   // and the rail is yours to fill again
 ```
 
 ## Languages

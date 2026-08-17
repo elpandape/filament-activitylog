@@ -49,5 +49,9 @@ final class BeforeLoggingHooks
         if (config('filament-activitylog.logging.seal_actors', true) === true) {
             ActorSeal::stamp($activity);
         }
+
+        if (config('filament-activitylog.logging.stamp_request', true) === true) {
+            RequestStamp::apply($activity);
+        }
     }
 }
